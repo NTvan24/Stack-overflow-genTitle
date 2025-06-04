@@ -11,6 +11,8 @@ from transformers import (
 from datasets.utils.logging import disable_progress_bar, enable_progress_bar
 from rouge_score import rouge_scorer
 import torch
+import os
+from huggingface_hub import login
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--task", type=str, choices=["gen", "denoise"], required=True)
@@ -35,6 +37,8 @@ elif args.task == "gen":
     target_max_len = 64
 
 num_epochs = args.num_train_epochs if args.num_train_epochs else default_epochs
+
+
 
 print(f"Loading data from: {args.train_file}")
 df_train = pd.read_csv(args.train_file)
@@ -125,5 +129,7 @@ torch.cuda.empty_cache()
 trainer.train()
 
 if args.push_to_hub:
+    
+    login(token=secret_value)
     trainer.push_to_hub()
     print(f"Model pushed to: https://huggingface.co/{args.hub_model_id}")
